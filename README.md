@@ -55,7 +55,7 @@ Rule-Based Scoring (60%) + TF-IDF NLP Similarity (40%) = Hybrid Fit Score
 
 ### Option 1: Live Streamlit Dashboard (Recommended)
 You can view the fully functioning, deployed web application here:
-🔗 **[Live Streamlit App](https://kuldeeppanwar02-resume-screening-talentbridge.streamlit.app)**
+🔗 **[Live Streamlit App](https://resume-screening-and-role-matching-using-nlp.streamlit.app/)**
 
 ### Option 2: Run Streamlit Locally
 ```bash
