@@ -112,7 +112,7 @@ div[data-testid="stSidebar"] *{{color:{INK_M}!important;}}
     font-size:12px;font-weight:500;padding:4px 12px;border-radius:9999px;
     border:1px solid {HAIR2};color:{INK_M};background:{SURF1};margin:3px;}}
 .jd-pill.must{{background:rgba(94,106,210,.10);border-color:rgba(94,106,210,.30);color:{ACCENT};}}
-.jd-pill.nice{{background:{SURF1};border-color:{HAIR2};color:{INK_S};}}
+.jd-pill.nice{{background:#1e1e24;border-color:#3a3a40;color:#a0a4b0;}}
 
 /* Fit pills */
 .ph{{display:inline-block;padding:3px 10px;border-radius:9999px;font-size:11px;
@@ -164,7 +164,7 @@ SKILL_MAP = {
 
 # ── JOB DESCRIPTIONS — grouped by domain ─────────────────────────────────────
 DOMAINS = {
-    '💻 IT': {
+    'IT & Engineering': {
         'Senior Software Engineer': {
             'mandatory':['Python','Java','Git','SQL'],
             'optional' :['Docker','Kubernetes','AWS','Linux'],
@@ -184,7 +184,7 @@ DOMAINS = {
             'jd_text':'docker linux git kubernetes devops ci cd pipeline automation aws python deployment monitoring bash'
         },
     },
-    '🧠 Data Science': {
+    'Data Science & AI': {
         'Data Scientist': {
             'mandatory':['Python','Machine Learning','SQL','Pandas'],
             'optional' :['TensorFlow','NLP','Power BI','NumPy'],
@@ -443,10 +443,10 @@ st.markdown('<div class="div"></div>', unsafe_allow_html=True)
 
 # ── TABS ──────────────────────────────────────────────────────────────────────
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📊  Analytics",
-    "🤖  ML Models & Accuracy",
-    "🏆  Candidate Rankings",
-    "📥  Export Results"
+    "Analytics",
+    "ML Models & Accuracy",
+    "Candidate Rankings",
+    "Export Results"
 ])
 
 # ════ TAB 1 — ANALYTICS ══════════════════════════════════════════════════════
