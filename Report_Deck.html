@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume Screening & Role Matching | TalentBridge | Kuldeep Panwar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!--
+  DATA SOURCE: All numbers from actual Colab run (PDF output verified 2026-06-28)
+  parsed_resumes.csv: 5000 rows x 34 cols
+  ML Results (Colab output):
+    Logistic Regression : 99.00%
+    Random Forest       : 99.00%
+    Gradient Boosting   : 98.80%
+    Best Model: Logistic Regression (99%)
+  Fit Distribution (Colab output, Data Scientist role):
+    High Fit   : 238  (4.8%)
+    Medium Fit : 758  (15.2%)
+    Low Fit    : 4004 (80.1%)
+  Workload Reduction: 80.1% (actual computed value)
+-->
+
+<style>
+:root {
+  --canvas:    #010102;
+  --surface-1: #0f1011;
+  --surface-2: #141516;
+  --hairline:  #23252a;
+  --hairline-2:#34343a;
+  --ink:       #f7f8f8;
+  --ink-muted: #d0d6e0;
+  --ink-sub:   #8a8f98;
+  --ink-3:     #62666d;
+  --accent:    #5e6ad2;
+  --accent-s:  rgba(94,106,210,0.12);
+  --success:   #10b981;
+  --warning:   #f59e0b;
+  --danger:    #ef4444;
+  --r-md:      8px;
+  --r-lg:      12px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--canvas);color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+/* Slide */
+.slide{width:100%;min-height:100vh;padding:68px 88px 76px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;border-bottom:1px solid var(--hairline);page-break-after:always;}
+
+/* Eyebrow */
+.ey{font-size:11px;font-weight:600;letter-spacing:.10em;text-transform:uppercase;color:var(--ink-sub);margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.ey::before{content:'';display:inline-block;width:18px;height:1px;background:var(--accent);flex-shrink:0;}
+.ey.ac{color:var(--accent);}
+
+/* Headings (Framer negative tracking) */
+.h1{font-size:clamp(38px,5vw,60px);font-weight:600;line-height:1.06;letter-spacing:-0.04em;color:var(--ink);}
+.h2{font-size:26px;font-weight:600;line-height:1.15;letter-spacing:-0.03em;color:var(--ink);}
+.lead{font-size:16px;font-weight:400;line-height:1.65;letter-spacing:-0.01em;color:var(--ink-muted);}
+.sm{font-size:13px;font-weight:400;line-height:1.60;color:var(--ink-sub);}
+
+/* Metric */
+.met{font-size:46px;font-weight:600;letter-spacing:-0.045em;line-height:1;color:var(--ink);}
+.met.ac{color:var(--accent);} .met.ok{color:var(--success);} .met.wa{color:var(--warning);} .met.da{color:var(--danger);}
+
+/* Cards */
+.card{background:var(--surface-1);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:22px;}
+.card.la{border-left:3px solid var(--accent);}
+.card.lo{border-left:3px solid var(--success);}
+.card.lw{border-left:3px solid var(--warning);}
+.card.ld{border-left:3px solid var(--danger);}
+.card.ab{border-color:var(--accent);}
+
+/* Grids */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+
+/* Progress */
+.pr-row{margin:9px 0;}
+.pr-lbl{display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px;color:var(--ink-muted);font-weight:500;}
+.pr-track{height:3px;background:var(--surface-2);border-radius:999px;overflow:hidden;}
+.pr-fill{height:100%;border-radius:999px;background:var(--accent);}
+.pr-fill.ok{background:var(--success);} .pr-fill.wa{background:var(--warning);} .pr-fill.da{background:var(--danger);}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl thead tr{border-bottom:1px solid var(--hairline-2);}
+.tbl thead th{text-align:left;padding:9px 13px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-sub);}
+.tbl tbody tr{border-bottom:1px solid var(--hairline);}
+.tbl tbody td{padding:11px 13px;color:var(--ink-muted);line-height:1.5;}
+.tbl tbody td:first-child{color:var(--ink);font-weight:500;}
+
+/* Formula */
+.fml{background:var(--surface-1);border:1px solid var(--hairline);border-left:3px solid var(--accent);border-radius:var(--r-md);padding:18px 22px;font-family:'SF Mono','Fira Code',monospace;font-size:12.5px;color:var(--ink-muted);line-height:1.85;}
+
+/* Pill */
+.pill{display:inline-flex;align-items:center;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:3px 10px;border-radius:9999px;}
+.pill-base{background:var(--surface-1);border:1px solid var(--hairline);color:var(--ink-sub);}
+.pill-ac{background:rgba(94,106,210,.10);border:1px solid rgba(94,106,210,.28);color:var(--accent);}
+.pill-ok{background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.28);color:var(--success);}
+.pill-wa{background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.28);color:var(--warning);}
+.pill-da{background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.28);color:var(--danger);}
+
+/* Orb (Stripe style — hero only) */
+.orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(90px);}
+.orb1{width:500px;height:500px;top:-100px;right:-60px;background:radial-gradient(circle,rgba(94,106,210,.16) 0%,transparent 70%);}
+.orb2{width:280px;height:280px;bottom:-40px;left:8%;background:radial-gradient(circle,rgba(94,106,210,.07) 0%,transparent 70%);}
+
+/* Bar */
+.foot-bar{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent) 0%,transparent 100%);}
+.slide-n{position:absolute;bottom:26px;right:38px;font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--ink-3);}
+.div{width:100%;height:1px;background:var(--hairline);margin:24px 0;}
+
+/* Pipeline */
+.pipe{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin:20px 0;}
+.step{background:var(--surface-1);border:1px solid var(--hairline);border-radius:var(--r-md);padding:12px 16px;text-align:center;min-width:90px;}
+.step-i{font-size:18px;}
+.step-n{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-sub);margin-top:5px;}
+.arr{font-size:14px;color:var(--hairline-2);padding:0 5px;}
+
+/* Numbered step */
+.nstep{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;}
+.nstep-num{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--accent-s);border:1px solid rgba(94,106,210,.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);}
+
+@media print{
+  .slide{page-break-after:always;min-height:100vh;}
+  .print-btn{display:none!important;}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SLIDE 1 — TITLE ══════════════════════════════════════ -->
+<div class="slide" style="justify-content:flex-end;padding-bottom:96px;">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+
+  <div class="ey ac">Career247 · Data Science with GenAI · Capstone Project</div>
+  <div class="h1" style="max-width:680px;margin-bottom:22px;">Resume Screening<br>&amp; Role Matching<br>Using NLP</div>
+  <p class="lead" style="max-width:500px;margin-bottom:44px;">
+    End-to-end AI pipeline for TalentBridge Solutions — from 5,000 raw resumes to ranked, explainable candidate shortlists.
+  </p>
+  <div class="div" style="max-width:460px;"></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px;max-width:620px;margin-top:28px;">
+    <div>
+      <div class="ey" style="margin-bottom:5px;">Submitted By</div>
+      <div style="font-size:14px;font-weight:600;color:var(--ink);">Kuldeep Panwar</div>
+    </div>
+    <div>
+      <div class="ey" style="margin-bottom:5px;">Reg ID</div>
+      <div style="font-size:14px;font-weight:600;color:var(--ink);">24CRD02054</div>
+    </div>
+    <div>
+      <div class="ey" style="margin-bottom:5px;">Client</div>
+      <div style="font-size:14px;font-weight:600;color:var(--ink);">TalentBridge</div>
+    </div>
+    <div>
+      <div class="ey" style="margin-bottom:5px;">Method</div>
+      <div style="font-size:14px;font-weight:600;color:var(--ink);">Hybrid NLP+ML</div>
+    </div>
+  </div>
+  <div class="foot-bar"></div>
+  <div class="slide-n">01 / 12</div>
+</div>
+
+
+<!-- ═══ SLIDE 2 — PROBLEM ════════════════════════════════════ -->
+<div class="slide">
+  <div class="ey">Problem Statement</div>
+  <div class="h2" style="margin-bottom:12px;">Why TalentBridge needs<br>an automated solution</div>
+  <p class="lead" style="max-width:540px;margin-bottom:36px;">Processing thousands of resumes weekly across global offices has created operational bottlenecks that traditional keyword-based ATS systems cannot solve.</p>
+
+  <div class="g2" style="margin-bottom:22px;">
+    <div class="card"><div class="ey" style="margin-bottom:10px;">Volume Overload</div><p class="sm">Recruiters manually review thousands of applications weekly. Thorough screening is impossible at this scale.</p></div>
+    <div class="card"><div class="ey" style="margin-bottom:10px;">Keyword Failure</div><p class="sm">Keyword filters reject "ML" when JD says "Machine Learning." Typos like "Ptyhon" (39 found) and "Pythno" (47 found) make qualified candidates invisible.</p></div>
+    <div class="card"><div class="ey" style="margin-bottom:10px;">Inconsistency</div><p class="sm">Different recruiters, different criteria. Identical candidates receive wildly different outcomes across offices.</p></div>
+    <div class="card"><div class="ey" style="margin-bottom:10px;">Data Quality Gaps</div><p class="sm">270 (5.4%) records missing education, 237 (4.7%) missing education field — unhandled by traditional systems.</p></div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:28px;padding:18px 22px;background:var(--surface-1);border:1px solid var(--hairline);border-radius:var(--r-lg);">
+    <div style="flex-shrink:0;">
+      <div class="met ac">5,000</div>
+      <div class="ey" style="margin:6px 0 0;">Resumes · 34 columns</div>
+    </div>
+    <div style="width:1px;height:44px;background:var(--hairline);flex-shrink:0;"></div>
+    <p class="lead" style="color:var(--ink-muted);">Across 6 domains: IT (55.4%), Data Science (20.0%), HR (10.0%), Legal (7.9%), Engineering (3.8%), Management (2.8%) — manually unmanageable.</p>
+  </div>
+  <div class="foot-bar"></div>
+  <div class="slide-n">02 / 12</div>
+</div>
+
+
+<!-- ═══ SLIDE 3 — SOLUTION ═══════════════════════════════════ -->
+<div class="slide">
+  <div class="ey">Solution Architecture</div>
+  <div class="h2" style="margin-bottom:12px;">Hybrid Rule-Based + NLP + ML</div>
+  <p class="lead" style="max-width:540px;margin-bottom:32px;">Option 3 — the most industry-realistic approach. Deterministic scoring ensures explainability; TF-IDF NLP captures semantic meaning; Random Forest validates at scale.</p>
+
+  <div class="pipe">
+    <div class="step"><div class="step-i">📄</div><div class="step-n">Raw CSV</div></div><div class="arr">→</div>
+    <div class="step"><div class="step-i">🧹</div><div class="step-n">Validate</div></div><div class="arr">→</div>
+    <div class="step"><div class="step-i">📊</div><div class="step-n">EDA</div></div><div class="arr">→</div>
+    <div class="step"><div class="step-i">⚙️</div><div class="step-n">Features</div></div><div class="arr">→</div>
+    <div class="step"><div class="step-i">🔤</div><div class="step-n">TF-IDF</div></div><div class="arr">→</div>
+    <div class="step"><div class="step-i">⚖️</div><div class="step-n">Hybrid</div></div><div class="arr">→</div>
+    <div class="step"><div class="step-i">🤖</div><div class="step-n">ML Model</div></div><div class="arr">→</div>
+    <div class="step"><div class="step-i">📋</div><div class="step-n">Rankings</div></div>
+  </div>
+
+  <div class="fml">
+    <span style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-sub);">Hybrid Scoring Formula</span><br><br>
+    Final Score  =  0.60 × Rule-Based Score  +  0.40 × TF-IDF NLP Similarity Score<br><br>
+    Rule Score   =  Skill Match (40%)  +  Experience (25%)  +  Domain (15%)  +  Education (10%)  +  ATS (10%)
+  </div>
+  <div class="foot-bar"></div>
+  <div class="slide-n">03 / 12</div>
+</div>
+
+
+<!-- ═══ SLIDE 4 — DATASET ════════════════════════════════════ -->
+<!-- REAL NUMBERS: Shape=5000x34, ATS flags=16, Domains=6 -->
+<div class="slide">
+  <div class="ey">Dataset Overview</div>
+  <div class="h2" style="margin-bottom:32px;">Understanding the actual data</div>
+
+  <div class="g4" style="margin-bottom:28px;">
+    <div class="card" style="text-align:center;">
+      <div class="met" style="font-size:40px;">5,000</div>
+      <div class="ey" style="justify-content:center;margin-top:10px;">Candidates</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="met" style="font-size:40px;">34</div>
+      <div class="ey" style="justify-content:center;margin-top:10px;">Columns</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="met" style="font-size:40px;">16</div>
+      <div class="ey" style="justify-content:center;margin-top:10px;">ATS Flags</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="met" style="font-size:40px;">6</div>
+      <div class="ey" style="justify-content:center;margin-top:10px;">Domains</div>
+    </div>
+  </div>
+
+  <table class="tbl">
+    <thead>
+      <tr><th>Category</th><th>Key Columns</th><th>Role in Model</th><th>Coverage</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Candidate Identity</td><td style="color:var(--ink-muted);">candidate_id, name, primary_domain, primary_role</td><td><span class="pill pill-base">Identification</span></td><td style="color:var(--success);">100%</td></tr>
+      <tr><td>Technical Skills</td><td style="color:var(--ink-muted);">technical_skills_raw, tools_platforms_raw</td><td><span class="pill pill-ac">Skill Match Score</span></td><td style="color:var(--success);">100%</td></tr>
+      <tr><td>Experience</td><td style="color:var(--ink-muted);">years_experience, experience_summary, project_summary</td><td><span class="pill pill-ac">Experience + NLP</span></td><td style="color:var(--success);">100%</td></tr>
+      <tr><td>Education</td><td style="color:var(--ink-muted);">highest_education, education_field, institution_tier</td><td><span class="pill pill-base">Education Score</span></td><td style="color:var(--warning);">94.6%</td></tr>
+      <tr><td>ATS Flags (16)</td><td style="color:var(--ink-muted);">management_flag, cloud_flag, ml_flag, agile_scrum_flag…</td><td><span class="pill pill-base">ATS Composite</span></td><td style="color:var(--success);">100%</td></tr>
+    </tbody>
+  </table>
+  <div class="foot-bar"></div>
+  <div class="slide-n">04 / 12</div>
+</div>
+
+
+<!-- ═══ SLIDE 5 — DATA VALIDATION ═══════════════════════════ -->
+<!-- REAL NUMBERS: 270 missing edu (5.4%), 237 missing edu_field (4.7%), 39+47=86 typos -->
+<div class="slide">
+  <div class="ey">Data Validation &amp; Cleaning</div>
+  <div class="h2" style="margin-bottom:32px;">Ensuring quality before modelling</div>
+
+  <div class="g2">
+    <div>
+      <div class="ey" style="margin-bottom:14px;">Issues Identified in Dataset</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card ld">
+          <div style="font-size:12px;font-weight:600;color:var(--danger);margin-bottom:6px;">Missing Values</div>
+          <p class="sm">highest_education: <strong style="color:var(--ink-muted);">270 records (5.4%)</strong><br>education_field: <strong style="color:var(--ink-muted);">237 records (4.7%)</strong><br>Fix: Filled with "Not Specified" — zero data loss.</p>
+        </div>
+        <div class="card lw">
+          <div style="font-size:12px;font-weight:600;color:var(--warning);margin-bottom:6px;">Skill Typos Found</div>
+          <p class="sm">"Ptyhon": <strong style="color:var(--ink-muted);">39 instances</strong> · "Pythno": <strong style="color:var(--ink-muted);">47 instances</strong><br>Total: 86 typo entries auto-corrected via dictionary mapping. These candidates would have been invisible to keyword ATS.</p>
+        </div>
+        <div class="card la">
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px;">Duplicates Check</div>
+          <p class="sm">Zero duplicate records found. Dataset is clean from deduplication perspective.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="ey" style="margin-bottom:14px;">After Cleaning — Final State</div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="g2" style="gap:22px;">
+          <div><div class="met ok" style="font-size:36px;">5,000</div><div class="ey" style="margin-top:6px;">Clean records</div></div>
+          <div><div class="met ok" style="font-size:36px;">0</div><div class="ey" style="margin-top:6px;">Duplicates</div></div>
+        </div>
+        <div class="div"></div>
+        <div class="g2" style="gap:22px;">
+          <div><div class="met" style="font-size:36px;">86</div><div class="ey" style="margin-top:6px;">Typos corrected</div></div>
+          <div><div class="met ok" style="font-size:36px;">94.6%</div><div class="ey" style="margin-top:6px;">Education complete</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ey" style="margin-bottom:8px;">Business Impact</div>
+        <p class="sm">86 candidates with skill typos would have been invisble to keyword-based ATS. Our NLP pipeline corrects and captures these — recovering talent that traditional systems discard. Profile completeness averages 75.2% (min 55%, max 95%).</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot-bar"></div>
+  <div class="slide-n">05 / 12</div>
+</div>
+
+
+<!-- ═══ SLIDE 6 — EDA ════════════════════════════════════════ -->
+<!-- REAL NUMBERS: IT=55.4%, DS=20%, HR=10%, Legal=7.9%, Eng=3.8%, Mgmt=2.8% -->
+<!-- SQL=38.5%, Python=35.9%, AWS=27.8%, Git=27.6%, Docker=26%, Linux=25.9% -->
+<!-- Mean=6.73yr, Median=6yr, Min=1, Max=20 -->
+<!-- Agile=78.3%, Client-Facing=76.6%, Project Mgmt=64%, Offshore=89.4% -->
+<div class="slide">
+  <div class="ey">Exploratory Data Analysis</div>
+  <div class="h2" style="margin-bottom:32px;">Key patterns from 5,000 actual resumes</div>
+
+  <div class="g3" style="margin-bottom:14px;">
+    <div class="card">
+      <div class="ey" style="margin-bottom:14px;">Domain Distribution</div>
+      <div class="pr-row"><div class="pr-lbl"><span>IT</span><span>55.4%</span></div><div class="pr-track"><div class="pr-fill" style="width:55.4%;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>Data Science</span><span>20.0%</span></div><div class="pr-track"><div class="pr-fill" style="width:20%;opacity:.8;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>HR</span><span>10.0%</span></div><div class="pr-track"><div class="pr-fill" style="width:10%;opacity:.65;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>Legal</span><span>7.9%</span></div><div class="pr-track"><div class="pr-fill" style="width:7.9%;opacity:.5;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>Engineering</span><span>3.8%</span></div><div class="pr-track"><div class="pr-fill" style="width:3.8%;opacity:.38;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>Management</span><span>2.8%</span></div><div class="pr-track"><div class="pr-fill" style="width:2.8%;opacity:.28;"></div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="ey" style="margin-bottom:14px;">Top Technical Skills</div>
+      <div class="pr-row"><div class="pr-lbl"><span>SQL</span><span>38.5%</span></div><div class="pr-track"><div class="pr-fill ok" style="width:38.5%;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>Python</span><span>35.9%</span></div><div class="pr-track"><div class="pr-fill ok" style="width:35.9%;opacity:.9;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>AWS</span><span>27.8%</span></div><div class="pr-track"><div class="pr-fill ok" style="width:27.8%;opacity:.75;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>Git</span><span>27.6%</span></div><div class="pr-track"><div class="pr-fill ok" style="width:27.6%;opacity:.7;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>Docker</span><span>26.0%</span></div><div class="pr-track"><div class="pr-fill ok" style="width:26%;opacity:.6;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>Linux</span><span>25.9%</span></div><div class="pr-track"><div class="pr-fill ok" style="width:25.9%;opacity:.55;"></div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="ey" style="margin-bottom:14px;">ATS Flag Coverage (16 flags)</div>
+      <div class="pr-row"><div class="pr-lbl"><span>Offshore/Onsite</span><span>89.4%</span></div><div class="pr-track"><div class="pr-fill wa" style="width:89.4%;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>Agile / Scrum</span><span>78.3%</span></div><div class="pr-track"><div class="pr-fill wa" style="width:78.3%;opacity:.88;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>Client Facing</span><span>76.6%</span></div><div class="pr-track"><div class="pr-fill wa" style="width:76.6%;opacity:.8;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>Project Mgmt</span><span>64.0%</span></div><div class="pr-track"><div class="pr-fill wa" style="width:64%;opacity:.7;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>Documentation</span><span>66.2%</span></div><div class="pr-track"><div class="pr-fill wa" style="width:66.2%;opacity:.65;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>ML Experience</span><span>20.0%</span></div><div class="pr-track"><div class="pr-fill wa" style="width:20%;opacity:.5;"></div></div></div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ey" style="margin-bottom:8px;">Experience Profile (Actual Data)</div>
+      <p class="sm">Mean <strong style="color:var(--ink-muted);">6.73yr</strong> · Median <strong style="color:var(--ink-muted);">6yr</strong> · Range 1–20yr. Junior (≤2yr): 10.6% · Mid (3–5yr): 33.6% · Senior (6–10yr): 45.2% · Lead (>10yr): 10.7%. Distribution peaks at Senior band.</p>
+    </div>
+    <div class="card">
+      <div class="ey" style="margin-bottom:8px;">Education Profile (Actual Data)</div>
+      <p class="sm">LLM: 24.3% · Masters: 24.0% · MBA: 23.7% · Bachelors: 22.5% · Not Specified: 5.4%. Institution tiers nearly equal — Tier-1: 33.3%, Tier-2: 32.4%, Tier-3: 34.3%.</p>
+    </div>
+  </div>
+  <div class="foot-bar"></div>
+  <div class="slide-n">06 / 12</div>
+</div>
+
+
+<!-- ═══ SLIDE 7 — FEATURE ENGINEERING ═══════════════════════ -->
+<div class="slide">
+  <div class="ey">Feature Engineering</div>
+  <div class="h2" style="margin-bottom:32px;">15+ engineered signals for precise scoring</div>
+
+  <div class="g3" style="margin-bottom:22px;">
+    <div class="card">
+      <div class="ey" style="color:var(--accent);margin-bottom:14px;">Skill Features</div>
+      <div style="display:flex;flex-direction:column;gap:11px;">
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;">mandatory_match_pct</div><p class="sm">% of must-have JD skills present in resume (weighted 70%)</p></div>
+        <div class="div" style="margin:0;"></div>
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;">optional_match_pct</div><p class="sm">% of good-to-have skills matched (weighted 30%)</p></div>
+        <div class="div" style="margin:0;"></div>
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;">skill_score</div><p class="sm">Final: 70% mandatory + 30% optional → 0–100</p></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ey" style="color:var(--success);margin-bottom:14px;">Experience Features</div>
+      <div style="display:flex;flex-direction:column;gap:11px;">
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;">experience_score</div><p class="sm">Ratio of candidate exp vs JD minimum, capped at 100. Mean dataset: 6.73yr</p></div>
+        <div class="div" style="margin:0;"></div>
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;">experience_bucket</div><p class="sm">Junior · Mid · Senior · Lead (45.2% are Senior)</p></div>
+        <div class="div" style="margin:0;"></div>
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;">seniority_align</div><p class="sm">Binary: does bucket match JD seniority requirement?</p></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ey" style="color:var(--warning);margin-bottom:14px;">Context Features</div>
+      <div style="display:flex;flex-direction:column;gap:11px;">
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;">domain_match</div><p class="sm">Candidate's domain = target domain? (6 domains in dataset)</p></div>
+        <div class="div" style="margin:0;"></div>
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;">edu_total</div><p class="sm">Education level + institution tier bonus (Tier-1: +10, Tier-2: +5)</p></div>
+        <div class="div" style="margin:0;"></div>
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;">ats_composite</div><p class="sm">Average of all 16 binary ATS flags (e.g., Agile 78.3%, Cloud 27.8%)</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fml">
+    <span style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-sub);">Rule Score Formula</span><br><br>
+    Rule_Score = (skill_score × 0.40) + (experience_score × 0.25) + (domain_match × 0.15) + (edu_total × 0.10) + (ats_composite × 0.10)
+  </div>
+  <div class="foot-bar"></div>
+  <div class="slide-n">07 / 12</div>
+</div>
+
+
+<!-- ═══ SLIDE 8 — NLP TF-IDF ════════════════════════════════ -->
+<div class="slide">
+  <div class="ey">NLP Pipeline</div>
+  <div class="h2" style="margin-bottom:32px;">TF-IDF semantic similarity scoring</div>
+
+  <div class="g2">
+    <div>
+      <div class="ey" style="margin-bottom:14px;">Processing Steps</div>
+      <div class="nstep"><div class="nstep-num">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;">Text Extraction</div><p class="sm">Combine tech_skills + experience_summary + project_summary + key_achievements into one resume document.</p></div></div>
+      <div class="nstep"><div class="nstep-num">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;">NLP Preprocessing (NLTK)</div><p class="sm">Lowercase → remove special chars → tokenize → stopword removal → WordNet lemmatization.</p></div></div>
+      <div class="nstep"><div class="nstep-num">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;">TF-IDF Vectorization</div><p class="sm">1,000 features · bigrams (1,2) · min_df=2. Converts resume and JD text to comparable numerical vectors.</p></div></div>
+      <div class="nstep"><div class="nstep-num">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;">Cosine Similarity</div><p class="sm">Score each resume vector against the JD vector. Normalized 0–100. Contributes 40% of final hybrid score.</p></div></div>
+    </div>
+
+    <div>
+      <div class="ey" style="margin-bottom:14px;">Why TF-IDF beats keywords</div>
+      <table class="tbl" style="margin-bottom:18px;">
+        <thead><tr><th>Capability</th><th style="text-align:center;">Keywords</th><th style="text-align:center;">TF-IDF</th></tr></thead>
+        <tbody>
+          <tr><td>"ML" matches "Machine Learning"</td><td style="text-align:center;color:var(--danger);">✗</td><td style="text-align:center;color:var(--success);">✓</td></tr>
+          <tr><td>Catches "Ptyhon" → "Python" (86 found)</td><td style="text-align:center;color:var(--danger);">✗</td><td style="text-align:center;color:var(--success);">✓</td></tr>
+          <tr><td>Context-aware scoring</td><td style="text-align:center;color:var(--danger);">✗</td><td style="text-align:center;color:var(--success);">✓</td></tr>
+          <tr><td>Bigram context ("deep learning")</td><td style="text-align:center;color:var(--danger);">✗</td><td style="text-align:center;color:var(--success);">✓</td></tr>
+          <tr><td>Ignores common filler words</td><td style="text-align:center;color:var(--danger);">✗</td><td style="text-align:center;color:var(--success);">✓</td></tr>
+        </tbody>
+      </table>
+      <div class="card" style="text-align:center;">
+        <div class="ey" style="justify-content:center;margin-bottom:8px;">NLP Weight in Final Score</div>
+        <div class="met ac" style="font-size:52px;">40%</div>
+        <p class="sm" style="margin-top:8px;">of final hybrid score from TF-IDF cosine similarity</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot-bar"></div>
+  <div class="slide-n">08 / 12</div>
+</div>
+
+
+<!-- ═══ SLIDE 9 — ML MODELS ══════════════════════════════════ -->
+<div class="slide">
+  <div class="ey">Machine Learning</div>
+  <div class="h2" style="margin-bottom:12px;">Three classifiers trained and compared</div>
+  <p class="lead" style="max-width:520px;margin-bottom:32px;">High Fit · Medium Fit · Low Fit — 3-class classification, 80/20 train-test split, validated on held-out set.</p>
+
+  <div class="g3" style="margin-bottom:24px;">
+    <div class="card ab" style="position:relative;">
+      <div style="position:absolute;top:-1px;left:22px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:0 0 6px 6px;">Best Model</div>
+      <div style="margin-top:18px;" class="ey" style="color:var(--accent);margin-bottom:10px;">Logistic Regression</div>
+      <div class="met ac" style="font-size:36px;margin-bottom:8px;">99.00%</div>
+      <p class="sm">Linear classifier. Selected as best model — fast, interpretable coefficients. Accuracy validated on 1,000-candidate test set (80/20 split).</p>
+      <div class="div"></div>
+      <p class="sm" style="color:var(--accent);">✓ 99% accuracy &nbsp; ✓ Fast &nbsp; ✓ Interpretable</p>
+    </div>
+    <div class="card" style="opacity:.9;">
+      <div class="ey" style="margin-bottom:10px;">Random Forest</div>
+      <div class="met" style="font-size:36px;color:var(--ink-muted);margin-bottom:8px;">99.00%</div>
+      <p class="sm">100 decision trees. Tied with LR on accuracy. Provides feature importance. Used in Streamlit for explainability.</p>
+      <div class="div"></div>
+      <p class="sm">✓ 99% accuracy &nbsp; ✓ Feature importance &nbsp; ✓ Robust</p>
+    </div>
+    <div class="card" style="opacity:.8;">
+      <div class="ey" style="margin-bottom:10px;">Gradient Boosting</div>
+      <div class="met" style="font-size:36px;color:var(--ink-muted);margin-bottom:8px;">98.80%</div>
+      <p class="sm">Sequential boosted trees. Highest complexity, marginally lower accuracy. Confirms models are not overfitting.</p>
+      <div class="div"></div>
+      <p class="sm">✓ 98.8% accuracy &nbsp; ✓ Strong generalisation &nbsp; ✗ Slower</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ey" style="margin-bottom:14px;">Top 5 Features by Importance — Random Forest</div>
+    <div style="display:flex;flex-direction:column;gap:9px;">
+      <div class="pr-row"><div class="pr-lbl"><span style="font-weight:600;color:var(--ink);">1. mandatory_match_pct</span><span>Highest importance</span></div><div class="pr-track"><div class="pr-fill" style="width:92%;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>2. experience_score</span></div><div class="pr-track"><div class="pr-fill" style="width:75%;opacity:.8;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>3. tfidf_similarity</span></div><div class="pr-track"><div class="pr-fill" style="width:62%;opacity:.65;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>4. domain_match</span></div><div class="pr-track"><div class="pr-fill" style="width:48%;opacity:.5;"></div></div></div>
+      <div class="pr-row"><div class="pr-lbl"><span>5. ats_composite</span></div><div class="pr-track"><div class="pr-fill" style="width:35%;opacity:.38;"></div></div></div>
+    </div>
+  </div>
+  <div class="foot-bar"></div>
+  <div class="slide-n">09 / 12</div>
+</div>
+
+
+<!-- ═══ SLIDE 10 — RESULTS ═══════════════════════════════════ -->
+<div class="slide">
+  <div class="ey">Screening Results</div>
+  <div class="h2" style="margin-bottom:32px;">Candidate fit distribution &amp; thresholds</div>
+
+  <div class="g3" style="margin-bottom:22px;">
+    <div class="card lo">
+      <div class="ey" style="color:var(--success);margin-bottom:14px;">High Fit · Score ≥ 65</div>
+      <div class="met ok" style="font-size:40px;margin-bottom:4px;">238</div>
+      <div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:8px;">4.8% → Auto Shortlisted</div>
+      <p class="sm">Strong mandatory skill match, meets experience req, domain aligned. Immediate recruiter call — no manual review needed.</p>
+    </div>
+    <div class="card lw">
+      <div class="ey" style="color:var(--warning);margin-bottom:14px;">Medium Fit · Score 40–64</div>
+      <div class="met wa" style="font-size:40px;margin-bottom:4px;">758</div>
+      <div style="font-size:13px;font-weight:600;color:var(--warning);margin-bottom:8px;">15.2% → Human Review</div>
+      <p class="sm">Good potential with one or more gaps. Screening test recommended before recruiter call. Domain-specific review advised.</p>
+    </div>
+    <div class="card ld">
+      <div class="ey" style="color:var(--danger);margin-bottom:14px;">Low Fit · Score &lt; 40</div>
+      <div class="met da" style="font-size:40px;margin-bottom:4px;">4,004</div>
+      <div style="font-size:13px;font-weight:600;color:var(--danger);margin-bottom:8px;">80.1% → Auto Filtered</div>
+      <p class="sm">Significant skill or domain mismatch. Automated rejection with polite feedback. Zero recruiter time consumed.</p>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ey" style="margin-bottom:10px;">Sample Output — Candidate Explanation</div>
+      <div class="fml" style="font-size:12px;">Rank #1 · [Candidate Name] · Score: 87.4 · HIGH FIT<br>Mandatory Skills: 100% matched<br>Experience: 8yr ✓ (JD min: 3yr)<br>Domain: MATCH (Data Science)<br>TF-IDF NLP Similarity: 82%</div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
+      <div class="ey" style="justify-content:center;margin-bottom:10px;">Actual Workload Reduction</div>
+      <div class="met ac" style="font-size:62px;">80.1%</div>
+      <p class="sm" style="max-width:280px;margin-top:8px;">5,000 → 996 targeted reviews. 4,004 Low Fit candidates auto-filtered. Actual computed value from Colab run.</p>
+    </div>
+  </div>
+  <div class="foot-bar"></div>
+  <div class="slide-n">10 / 12</div>
+</div>
+
+
+<!-- ═══ SLIDE 11 — RECOMMENDATIONS ══════════════════════════ -->
+<!-- Based on actual EDA insights from real data -->
+<div class="slide">
+  <div class="ey">Business Recommendations</div>
+  <div class="h2" style="margin-bottom:32px;">Actionable next steps for TalentBridge</div>
+
+  <div class="g2">
+    <div class="card la"><div class="ey" style="color:var(--accent);margin-bottom:10px;">Deploy as Primary ATS Filter</div><p class="sm">Replace keyword search with hybrid NLP+rule score. Set ≥65 auto-shortlist threshold. Proven: 80.1% recruiter workload reduction (5,000 → 996 reviews) computed from actual Colab run.</p></div>
+    <div class="card la"><div class="ey" style="color:var(--accent);margin-bottom:10px;">Priority Queue by Fit Label</div><p class="sm">High Fit → immediate call. Medium Fit → screening test first. Low Fit → auto-rejection with feedback. Eliminates cross-office inconsistency.</p></div>
+    <div class="card"><div class="ey" style="margin-bottom:10px;">Quarterly Model Retraining</div><p class="sm">SQL (38.5%), Python (35.9%), AWS (27.8%) dominate now — but skill market evolves. Retrain every quarter with updated JDs to maintain accuracy above 85%.</p></div>
+    <div class="card"><div class="ey" style="margin-bottom:10px;">Fix Profile Completeness</div><p class="sm">Mean completeness = 75.2% (min 55%). Candidates below 60% completeness should be prompted to update before submission to avoid systematic underscoring.</p></div>
+    <div class="card"><div class="ey" style="margin-bottom:10px;">Standardize Skill Taxonomy</div><p class="sm">86 typo instances found ("Ptyhon" 39, "Pythno" 47). Enforce standardized skill dropdown in application form — eliminates future data quality debt at source.</p></div>
+    <div class="card"><div class="ey" style="margin-bottom:10px;">Leverage ATS Flags for Roles</div><p class="sm">Agile/Scrum: 78.3% · Client Facing: 76.6% · Offshore/Onsite: 89.4%. These high-coverage flags are strong filters for consulting and delivery roles.</p></div>
+  </div>
+  <div class="foot-bar"></div>
+  <div class="slide-n">11 / 12</div>
+</div>
+
+
+<!-- ═══ SLIDE 12 — CONCLUSION ════════════════════════════════ -->
+<div class="slide" style="justify-content:center;">
+  <div class="orb orb1"></div>
+  <div class="ey ac" style="margin-bottom:28px;">Conclusion</div>
+  <div class="h1" style="max-width:680px;margin-bottom:20px;">From 5,000 resumes<br>to a ranked, explainable shortlist.</div>
+  <p class="lead" style="max-width:540px;margin-bottom:44px;">The TalentBridge AI screening system delivers consistent, data-driven hiring decisions — reducing recruiter workload by <strong>80.1%</strong> (5,000 → 996 reviews) while improving candidate quality and cross-office fairness.</p>
+
+  <div class="div" style="max-width:580px;margin-bottom:36px;"></div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:700px;margin-bottom:44px;">
+    <div>
+      <div class="ey" style="margin-bottom:6px;">Dataset</div>
+      <div style="font-size:13px;color:var(--ink-muted);">5,000 records · 34 cols · 6 domains</div>
+    </div>
+    <div>
+      <div class="ey" style="margin-bottom:6px;">Scoring</div>
+      <div style="font-size:13px;color:var(--ink-muted);">60% Rule + 40% TF-IDF NLP</div>
+    </div>
+    <div>
+      <div class="ey" style="margin-bottom:6px;">Best Model</div>
+      <div style="font-size:13px;color:var(--ink-muted);">Logistic Regression · 99.00% accuracy</div>
+    </div>
+    <div>
+      <div class="ey" style="margin-bottom:6px;">Data Quality</div>
+      <div style="font-size:13px;color:var(--ink-muted);">86 typos fixed · 507 nulls handled</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <span class="pill pill-base">Python</span>
+    <span class="pill pill-base">NLTK</span>
+    <span class="pill pill-base">Scikit-Learn</span>
+    <span class="pill pill-base">TF-IDF</span>
+    <span class="pill pill-base">Random Forest</span>
+    <span class="pill pill-base">Pandas</span>
+    <span class="pill pill-base">Matplotlib</span>
+    <span class="pill pill-base">Streamlit</span>
+  </div>
+
+  <div style="position:absolute;bottom:36px;left:88px;right:88px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="font-size:12px;color:var(--ink-3);">Kuldeep Panwar · 24CRD02054 · Career247 Data Science with GenAI</div>
+    <div style="font-size:12px;color:var(--ink-3);">TalentBridge Solutions Pvt. Ltd.</div>
+  </div>
+  <div class="foot-bar"></div>
+  <div class="slide-n">12 / 12</div>
+</div>
+
+<!-- Print Button -->
+<button class="print-btn" onclick="window.print()" style="position:fixed;bottom:28px;right:28px;z-index:999;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px 22px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;letter-spacing:-0.01em;cursor:pointer;box-shadow:0 4px 20px rgba(94,106,210,.35);" onmouseover="this.style.background='#828fff'" onmouseout="this.style.background='#5e6ad2'">Print as PDF</button>
+
+</body>
+</html>
