@@ -24,127 +24,87 @@ TalentBridge processes thousands of resumes weekly but faces:
 
 ---
 
-## 🔧 Solution Approach — Option 3 (Hybrid)
+## 🔧 Solution Approach — Hybrid Pipeline
 
-```
+```text
 Rule-Based Scoring (60%) + TF-IDF NLP Similarity (40%) = Hybrid Fit Score
                     +
-        ML Classification (Random Forest — Best Model)
+        ML Classification (Random Forest / Logistic Regression)
 ```
 
 ---
 
 ## 📁 File Structure
 
-```
+```text
 24CRD02054_KuldeepPanwar_ResumeScreeningAndRoleMatching/
 │
-├── 📓 Project_4_Resume_Screening_NLP.ipynb     ← Main notebook (run this)
-├── 📊 Report_Deck.pdf                          ← 10-slide analytical report
-├── 🌐 streamlit_app.py                         ← Interactive UI
-├── 🤖 best_model.pkl                           ← Saved Random Forest model
-├── 🔧 tfidf_vectorizer.pkl                     ← Saved TF-IDF vectorizer
+├── 📓 Resume_Screening_LOCAL_JUPYTER.ipynb     ← Main Jupyter Notebook
+├── 📊 Report_Deck.html                         ← Analytical report (Print to PDF)
+├── 🌐 streamlit_app.py                         ← Interactive UI (Live Dashboard)
 ├── 📄 README.md                                ← This file
 ├── 📋 requirements.txt                         ← Python dependencies
 │
-├── data/
-│   └── parsed_resumes.csv                      ← Input dataset (5000 rows)
-│
-└── outputs/
-    ├── resumes_cleaned_features.csv            ← Cleaned dataset + features
-    ├── final_candidate_rankings.csv            ← Ranked candidates output
-    └── plots/                                  ← All EDA & model charts
+└── data/
+    └── parsed_resumes.csv                      ← Input dataset (5000 rows)
 ```
 
 ---
 
 ## ⚙️ How to Run
 
-### Option 1: Google Colab (Recommended)
-1. Upload `Project_4_Resume_Screening_NLP.ipynb` to Google Colab
-2. Upload `parsed_resumes.csv` when prompted
-3. Run All cells (`Runtime → Run All`)
-4. Download outputs
+### Option 1: Live Streamlit Dashboard (Recommended)
+You can view the fully functioning, deployed web application here:
+🔗 **[Live Streamlit App](https://kuldeeppanwar02-resume-screening-talentbridge.streamlit.app)**
 
-### Option 2: Local Jupyter
-```bash
-pip install -r requirements.txt
-jupyter notebook Project_4_Resume_Screening_NLP.ipynb
-```
-
-### Option 3: Streamlit Dashboard
+### Option 2: Run Streamlit Locally
 ```bash
 pip install -r requirements.txt
 streamlit run streamlit_app.py
 ```
 
----
-
-## 📦 Dependencies
-
-```
-pandas==2.3.3
-numpy==2.4.3
-scikit-learn==1.8.0
-matplotlib==3.10.8
-seaborn==0.13.2
-nltk==3.9.3
-xgboost==3.2.0
-streamlit==1.55.0
-wordcloud==1.9.6
-missingno==0.5.2
-openpyxl==3.1.5
+### Option 3: Run Jupyter Notebook Locally
+```bash
+pip install -r requirements.txt
+jupyter notebook Resume_Screening_LOCAL_JUPYTER.ipynb
 ```
 
 ---
 
-## 📊 Key Results
+## 📊 Key Results & Metrics
 
 | Metric | Value |
 |--------|-------|
 | Dataset Size | 5,000 candidates |
-| Features Engineered | 15+ |
-| Best ML Model | Random Forest |
-| High Fit Candidates | ~X% |
-| Recruiter Workload Reduction | ~Y% |
-| NLP Vocab Size | 1,000 terms |
+| Best ML Model | Logistic Regression (99.0% Accuracy) |
+| Random Forest Accuracy | 99.0% |
+| High Fit Candidates (IT) | ~6% |
+| Recruiter Workload Reduction | **80.1%** |
+| Processing Time | Instant ranking |
 
 ---
 
 ## 🏗️ Pipeline Architecture
 
-```
-Raw CSV (5000 resumes)
-    ↓
-Data Validation & Cleaning
-    ↓
-Exploratory Data Analysis (6 visualizations)
-    ↓
-Feature Engineering (skill match, experience, domain, education, ATS)
-    ↓
-NLP — TF-IDF Vectorization + Cosine Similarity
-    ↓
-Hybrid Fit Score = 60% Rule + 40% NLP
-    ↓
-ML Classification (LR vs RF vs GB — Random Forest wins)
-    ↓
-Ranked Candidate List + Explainable Recommendations
-    ↓
-Business Report for TalentBridge Recruiters
-```
+1. **Data Validation & Cleaning:** Handling missing values and fixing typos.
+2. **Feature Engineering:** Calculating skill match %, experience penalty/bonus, domain matching, education tier scoring, and ATS flags.
+3. **NLP (TF-IDF):** Vectorizing resume text against job descriptions and computing Cosine Similarity.
+4. **Hybrid Scoring:** Combining Rule-Based metrics (60%) and NLP scores (40%).
+5. **ML Classification:** Training Logistic Regression, Random Forest, and Gradient Boosting on the Hybrid Score data.
+6. **Dashboard UI:** Interactive filtering and explainable rankings for recruiters via Streamlit.
 
 ---
 
 ## 💼 Business Impact
 
-- **Faster Screening:** Automated scoring reduces manual review time
-- **Consistency:** Same objective criteria applied to all candidates
-- **Explainability:** Every score comes with a plain-English explanation
-- **Scalability:** System handles thousands of resumes instantly
+- **Faster Screening:** Automated scoring reduces manual review time drastically.
+- **80.1% Workload Saved:** Instantly filters out "Low Fit" candidates.
+- **Consistency:** Same objective criteria applied to all candidates.
+- **Explainability:** Every score provides transparent matching metrics (Skills, Experience, NLP).
 
 ---
 
 ## 📞 Contact
 
 **Kuldeep Panwar** | Reg: 24CRD02054  
-Career247 — Data Science with GenAI Capstone  
+Career247 — Data Science with GenAI Capstone
