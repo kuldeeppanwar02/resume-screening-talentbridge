@@ -364,15 +364,28 @@ def train_models(df_scored):
     return results, best_name, feat_imp, features, le
 
 # ─── SIDEBAR ─────────────────────────────────────────────────────────────────
+import os
+DEFAULT_CSV = 'data/parsed_resumes.csv'
+
 with st.sidebar:
     st.markdown('<div class="eyebrow">TalentBridge AI</div>', unsafe_allow_html=True)
     st.markdown('<div class="display" style="font-size:20px;margin-bottom:20px;">Resume Screener</div>',
                 unsafe_allow_html=True)
     st.markdown('<div class="sec-div"></div>', unsafe_allow_html=True)
 
-    uploaded = st.file_uploader("Upload parsed_resumes.csv", type=['csv'],
-                                label_visibility='collapsed')
-    st.markdown('<div class="eyebrow">Dataset</div>', unsafe_allow_html=True)
+    # Auto-load CSV if present in repo (Streamlit Cloud)
+    if os.path.exists(DEFAULT_CSV):
+        st.markdown(f'<div class="eyebrow" style="color:{SUCCESS};">Dataset</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="font-size:12px;color:{SUCCESS};margin-bottom:4px;">✓ parsed_resumes.csv loaded</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="font-size:11px;color:{INK_SUB};margin-bottom:8px;">5,000 candidates · 34 columns</div>', unsafe_allow_html=True)
+        uploaded = None          # not used when auto-loading
+        auto_csv = DEFAULT_CSV
+    else:
+        uploaded = st.file_uploader("Upload parsed_resumes.csv", type=['csv'],
+                                    label_visibility='collapsed')
+        st.markdown('<div class="eyebrow">Dataset</div>', unsafe_allow_html=True)
+        auto_csv = None
+
     st.markdown('<div class="sec-div"></div>', unsafe_allow_html=True)
 
     st.markdown('<div class="eyebrow">Target Role</div>', unsafe_allow_html=True)
@@ -397,7 +410,17 @@ with st.sidebar:
                                 label_visibility='collapsed')
 
 # ─── MAIN ────────────────────────────────────────────────────────────────────
-if uploaded is None:
+# Determine data source: auto-load > uploaded > none
+if auto_csv:
+    df_raw = pd.read_csv(auto_csv)
+    data_loaded = True
+elif uploaded is not None:
+    df_raw = pd.read_csv(uploaded)
+    data_loaded = True
+else:
+    data_loaded = False
+
+if not data_loaded:
     st.markdown('<div class="eyebrow" style="color:#5e6ad2;">TalentBridge Solutions · AI Screening System</div>',
                 unsafe_allow_html=True)
     st.markdown('<div class="display" style="font-size:42px;max-width:600px;margin-bottom:16px;">Resume Screening<br>&amp; Role Matching</div>',
@@ -425,8 +448,6 @@ if uploaded is None:
     )
 
 else:
-    df_raw = pd.read_csv(uploaded)
-
     with st.spinner(f"Screening {len(df_raw):,} candidates for **{role}**…"):
         ranked = run_pipeline(df_raw, role)
 
