@@ -490,8 +490,8 @@ with tab1:
         ax.set_xlim(0, 100)
         ax.set_xlabel('Percentage of Candidates (%)', fontsize=11, labelpad=8)
         ax.tick_params(left=False, labelleft=False)
-        patches_leg = [mpatches.Patch(color=c,label=l) for c,l in
-                       zip(colors,[f'High Fit ({len(high)})',f'Medium Fit ({len(medium)})',f'Low Fit ({len(low)])'])]
+        patches_leg = [mpatches.Patch(color=c, label=l) for c, l in
+                       zip(colors, [f'High Fit ({len(high)})', f'Medium Fit ({len(medium)})', f'Low Fit ({len(low)})'])]
         ax.legend(handles=patches_leg, loc='lower center', bbox_to_anchor=(0.5,-0.28),
                   ncol=3, frameon=False, labelcolor=INK_M, fontsize=9)
         ax.grid(axis='x', alpha=0.2)
